@@ -1,18 +1,16 @@
 const { MySequelize } = require("./index");
 const mysql = require("mysql2/promise");
-const { Op } = require('./Op/OpSymbols')
-
+const { Op } = require("./Op/OpSymbols");
 
 let mysqlCon;
 
 describe("MySequelize Challenge", () => {
   beforeAll(async () => {
-
     mysqlCon = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: null,
-      database: 'db_test',
+      host: "localhost",
+      user: "root",
+      password: "nitzosql",
+      database: "db_test",
       multipleStatements: true,
     });
 
@@ -37,31 +35,30 @@ describe("MySequelize Challenge", () => {
         CONSTRAINT creator_pk FOREIGN KEY (creator) REFERENCES users (id)
       );
       `
-    )
-    return result
+    );
+    return result;
   });
 
   afterAll(async (done) => {
     await mysqlCon.query("DROP TABLE `playlists`");
     await mysqlCon.query("DROP TABLE `users`");
-    await mysqlCon.end()
-    done()
-  })
+    await mysqlCon.end();
+    done();
+  });
 
   describe("Insert() test", () => {
-
     afterEach(async () => {
-      await mysqlCon.query('DELETE FROM users')
-    })
+      await mysqlCon.query("DELETE FROM users");
+    });
 
     test("create test", async () => {
       const User = new MySequelize(mysqlCon, "users");
       await User.create({
         id: 21,
         name: "test",
-        email: 'test@gmail.com',
-        password: '123456789',
-        is_admin: false
+        email: "test@gmail.com",
+        password: "123456789",
+        is_admin: false,
       });
 
       const results = await mysqlCon.query(`SELECT * FROM users WHERE id = 21`);
@@ -75,21 +72,23 @@ describe("MySequelize Challenge", () => {
         {
           id: 22,
           name: "test2",
-          email: 'test2@gmail.com',
-          password: '123456789',
-          is_admin: false
+          email: "test2@gmail.com",
+          password: "123456789",
+          is_admin: false,
         },
         {
           id: 23,
           name: "test3",
-          email: 'test3@gmail.com',
-          password: '123456789',
-          is_admin: false
+          email: "test3@gmail.com",
+          password: "123456789",
+          is_admin: false,
         },
       ]);
 
       const results = await mysqlCon.query(`SELECT * FROM users WHERE id = 22`);
-      const results2 = await mysqlCon.query(`SELECT * FROM users WHERE id = 23`);
+      const results2 = await mysqlCon.query(
+        `SELECT * FROM users WHERE id = 23`
+      );
 
       expect(results[0][0].name).toBe("test2");
       expect(results2[0][0].name).toBe("test3");
@@ -98,7 +97,6 @@ describe("MySequelize Challenge", () => {
 
   describe("findAll() test", () => {
     beforeAll(async () => {
-
       await mysqlCon.query(`INSERT INTO users (name, email, password, is_admin)
           VALUES ('Dani', 'dani@gmail.com', '123456789', false),
           ('Yoni', 'yoni@gmail.com', '987654321', false),
@@ -195,13 +193,12 @@ describe("MySequelize Challenge", () => {
           {
             table: "playlists", // joining table name
             tableForeignKey: "creator", // joining table column name (FK)
-            sourceForeignKey: "id", // parent table column 
-          }
+            sourceForeignKey: "id", // parent table column
+          },
         ],
       });
 
-      console.log(myResults)
-
+      console.log(myResults);
 
       expect(myResults[0].id).toBe(results[0][0].id);
       expect(myResults[0].playlists[0].creator).toBe(results[0][0].id);
@@ -211,7 +208,6 @@ describe("MySequelize Challenge", () => {
   });
 
   describe("FindOne() and FindByPk()", () => {
-
     beforeAll(async () => {
       await mysqlCon.query("TRUNCATE TABLE `playlists`");
       await mysqlCon.query("DELETE FROM `users` WHERE id < 10000");
@@ -234,20 +230,20 @@ describe("MySequelize Challenge", () => {
       const myResults = await User.findOne();
 
       expect(myResults.length).toBe(1);
-      expect(myResults[0].name).toBe('Dani');
-    })
+      expect(myResults[0].name).toBe("Dani");
+    });
 
     test("findOne with conditions test", async () => {
       const User = new MySequelize(mysqlCon, "users");
       const myResults = await User.findOne({
-        where: { name: 'dani', password: '123456789' },
-        attributes: ['name', ['email', 'user_email']],
+        where: { name: "dani", password: "123456789" },
+        attributes: ["name", ["email", "user_email"]],
       });
 
       expect(myResults.length).toBe(1);
-      expect(myResults[0].name).toBe('Dani');
-      expect(myResults[0].user_email).toBe('dani@gmail.com');
-    })
+      expect(myResults[0].name).toBe("Dani");
+      expect(myResults[0].user_email).toBe("dani@gmail.com");
+    });
 
     test("findByPk test", async () => {
       const User = new MySequelize(mysqlCon, "users");
@@ -256,9 +252,9 @@ describe("MySequelize Challenge", () => {
 
       expect(myResults.length).toBe(1);
       expect(myResults[0].id).toBe(results[0][2].id);
-      expect(myResults[0].name).toBe('Ron');
-    })
-  })
+      expect(myResults[0].name).toBe("Ron");
+    });
+  });
 
   describe("update() test", () => {
     beforeAll(async () => {
@@ -302,38 +298,39 @@ describe("MySequelize Challenge", () => {
       expect(user[0][0].email).toBe("yoav@gmail.com");
     });
 
-    test('WHERE and LIMIT test', async () => {
-      const allUsers = await mysqlCon.query(`SELECT * FROM users`)
+    test("WHERE and LIMIT test", async () => {
+      const allUsers = await mysqlCon.query(`SELECT * FROM users`);
 
-      expect(allUsers[0][0].name).toBe('Yoav')
-      expect(allUsers[0][0].email).toBe('yoav@gmail.com')
+      expect(allUsers[0][0].name).toBe("Yoav");
+      expect(allUsers[0][0].email).toBe("yoav@gmail.com");
 
-      const User = new MySequelize(mysqlCon, 'users');
-      await User.update({ name: 'test', email: 'test@gmail.com' }, {
-        where: {
-          [Op.gt]: {
-            id: allUsers[0][1].id
+      const User = new MySequelize(mysqlCon, "users");
+      await User.update(
+        { name: "test", email: "test@gmail.com" },
+        {
+          where: {
+            [Op.gt]: {
+              id: allUsers[0][1].id,
+            },
+            [Op.lt]: {
+              id: allUsers[0][3].id,
+            },
           },
-          [Op.lt]: {
-            id: allUsers[0][3].id
-          }
-        },
-      })
+        }
+      );
 
-      const users = await mysqlCon.query(`SELECT * FROM users `)
+      const users = await mysqlCon.query(`SELECT * FROM users `);
 
-      console.log(users[0])
+      console.log(users[0]);
 
-      expect(users[0][0].name).toBe('Yoav')
+      expect(users[0][0].name).toBe("Yoav");
 
-      expect(users[0][2].name).toBe('test')
+      expect(users[0][2].name).toBe("test");
 
-      expect(users[0][2].email).toBe('test@gmail.com')
+      expect(users[0][2].email).toBe("test@gmail.com");
 
-      expect(users[0][4].name).toBe('Yuval')
-
-
-    })
+      expect(users[0][4].name).toBe("Yuval");
+    });
   });
 
   describe("Destroy() and Restore() test", () => {
@@ -342,7 +339,6 @@ describe("MySequelize Challenge", () => {
         `INSERT INTO users (id, name, password, email) VALUES 
         (1, 'gtrodel',12345678, 'gtrodel@gmail.com'), (2, 'rshnitzer',12345678, 'rshnitzer@gmail.com'), (3, 'osimhi', 12345678, 'osimhi@gmail.com'), (4, 'gmoshko', 666666, 'gmoshko@gmail.com')`
       );
-
     });
 
     afterEach(async () => {
@@ -355,8 +351,8 @@ describe("MySequelize Challenge", () => {
       expect(results[0][0].deleted_at).toBe(null);
       await Users.destroy({
         where: {
-          id: 1
-        }
+          id: 1,
+        },
       });
 
       const deletedUser = await mysqlCon.query(
@@ -367,15 +363,14 @@ describe("MySequelize Challenge", () => {
     });
 
     test("hard delete() test", async () => {
-
       const Users = new MySequelize(mysqlCon, "users");
       const results = await mysqlCon.query(`SELECT * FROM users WHERE id = 1`);
       expect(results[0][0]).not.toBe(undefined);
       await Users.destroy({
         where: {
-          id: 1
+          id: 1,
         },
-        force: true
+        force: true,
       });
       const deletedUser = await mysqlCon.query(
         `SELECT * FROM users WHERE id = 1`
@@ -387,13 +382,11 @@ describe("MySequelize Challenge", () => {
     test("restore() test", async () => {
       const Users = new MySequelize(mysqlCon, "users");
 
-      await Users.destroy(
-        {
-          where: {
-            id: 1
-          }
-        }
-      );
+      await Users.destroy({
+        where: {
+          id: 1,
+        },
+      });
 
       const deletedUser = await mysqlCon.query(
         `SELECT * FROM users WHERE id = 1`
@@ -414,8 +407,7 @@ describe("MySequelize Challenge", () => {
     });
   });
 
-  describe('SQL Injection test', () => {
-
+  describe("SQL Injection test", () => {
     beforeAll(async () => {
       await mysqlCon.query("TRUNCATE TABLE `playlists`");
       await mysqlCon.query("DELETE FROM `users` WHERE id < 10000");
@@ -435,31 +427,27 @@ describe("MySequelize Challenge", () => {
           ('playlist3', ${results[0][2].id}),
           ('playlist4', ${results[0][2].id}),
           ('playlist5', ${results[0][4].id});`);
-    })
+    });
 
     afterAll(async () => {
       await mysqlCon.query("TRUNCATE TABLE `playlists`");
       await mysqlCon.query("DELETE FROM `users`");
     });
 
-    test('get sensetive data', async () => {
-
-      const Playlist = new MySequelize(mysqlCon, 'playlists')
+    test("get sensetive data", async () => {
+      const Playlist = new MySequelize(mysqlCon, "playlists");
       const hack = await Playlist.findAll({
         where: {
-          id: "1' UNION SELECT id, name, password FROM users -- "
-        }
-      })
+          id: "1' UNION SELECT id, name, password FROM users -- ",
+        },
+      });
 
-      console.log(hack)
+      console.log(hack);
       // expect(hack.length).toBe(1)
+    });
+  });
 
-
-    })
-  })
-
-  describe('SQL Injection test', () => {
-
+  describe("SQL Injection test", () => {
     beforeAll(async () => {
       await mysqlCon.query("TRUNCATE TABLE `playlists`");
       await mysqlCon.query("DELETE FROM `users` WHERE id < 10000");
@@ -479,30 +467,29 @@ describe("MySequelize Challenge", () => {
           ('playlist3', ${results[0][2].id}),
           ('playlist4', ${results[0][2].id}),
           ('playlist5', ${results[0][4].id});`);
-    })
+    });
 
     afterAll(async () => {
       await mysqlCon.query("TRUNCATE TABLE `playlists`");
       await mysqlCon.query("DELETE FROM `users`");
     });
 
-    test('SQLI with UNION in findByPk()', async () => {
+    test("SQLI with UNION in findByPk()", async () => {
+      const Playlist = new MySequelize(mysqlCon, "playlists");
 
-      const Playlist = new MySequelize(mysqlCon, 'playlists')
-
-      let answer
+      let answer;
       try {
-        const hack = await Playlist.findByPk("1' UNION SELECT id, name, password FROM users -- -")
-        answer = hack
+        const hack = await Playlist.findByPk(
+          "1' UNION SELECT id, name, password FROM users -- -"
+        );
+        answer = hack;
+      } catch (err) {
+        answer = err;
       }
-      catch (err) {
-        answer = err
-      }
-      expect(() => { throw answer }).toThrowError()
-      expect(answer.errno).toBe(1064)
-
-
-
-    })
-  })
+      expect(() => {
+        throw answer;
+      }).toThrowError();
+      expect(answer.errno).toBe(1064);
+    });
+  });
 });
