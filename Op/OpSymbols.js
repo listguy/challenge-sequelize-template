@@ -1,5 +1,6 @@
+const Op = {
+  gt: Symbol.for(">"),
+  lt: Symbol.for("<"),
+};
 
-const Op = {}
-
-
-module.exports = { Op }
+module.exports = { Op };
