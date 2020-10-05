@@ -229,9 +229,10 @@ class MySequelize {
         //Creating an array containing trios of [key,value,operator]
         let keyValuesOp = opUsed.map((op) =>
           typeof op === "symbol"
-            ? [Object.entries(options.where[op]), Symbol.keyFor(op)].flat(2)
+            ? Object.entries(options.where[op])[0].concat(Symbol.keyFor(op))
             : [op, options.where[op], "="]
         );
+        console.log(keyValuesOp);
         //Converting the array into sql clause: for[id,5,>]->id>5
         whereClause += keyValuesOp
           .map(
