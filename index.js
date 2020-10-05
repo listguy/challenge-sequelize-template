@@ -87,14 +87,38 @@ class MySequelize {
         sql += ` LIMIT ${options.limit}`;
       }
     }
-    // console.log(sql);
+
     try {
       const result = await this.connection.query(sql);
-      //   console.log(result[0]);
+      if (options) {
+        if (options.include) {
+          let resultPlusINclude = await Promise.all(
+            result[0].map(async (obj) => {
+              const joiner = await this.connection.query(
+                `SELECT * FROM ${options.include[0].table} WHERE ${
+                  options.include[0].tableForeignKey
+                }=${obj[options.include[0].sourceForeignKey]}`
+              );
+              obj[options.include[0].table] = joiner[0];
+              return obj;
+            })
+          );
+          return resultPlusINclude;
+        }
+      }
       return result[0];
-    } catch (e) {
-      return e;
+    } catch (error) {
+      throw error.message;
     }
+
+    // console.log(sql);
+    // try {
+    //   const result = await this.connection.query(sql);
+    //   //   console.log(result[0]);
+    //   return result[0];
+    // } catch (e) {
+    //   return e;
+    // }
     /*
         Model.findAll({
             where: {
